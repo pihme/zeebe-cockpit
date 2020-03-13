@@ -1,4 +1,4 @@
 {
-  "name": "KVision fullstack template",
-  "description": "A multiplatform template application example for KVision."
+  "name": "zeebe-cockpit",
+  "description": "Web frontend to monitor a zeebe cluster"
 }

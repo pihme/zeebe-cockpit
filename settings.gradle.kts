@@ -18,4 +18,4 @@ pluginManagement {
         }
     }
 }
-rootProject.name = "template-fullstack-jooby"
+rootProject.name = "zeebe-cockpit"
