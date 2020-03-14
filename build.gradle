@@ -17,6 +17,10 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest-client'
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-resteasy'
+    
+    // zeebe cockpit dependencies 
+    implementation 'io.zeebe:zeebe-client-java:0.22.2'
+    // zeebe cockpit dependencies
 
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
