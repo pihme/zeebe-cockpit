@@ -17,11 +17,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import io.vertx.core.impl.ConcurrentHashSet;
-import io.zeebe.client.api.response.Topology;
 
-@ServerEndpoint("/status/topology/feed")
+@ServerEndpoint("/status/feed")
 @ApplicationScoped
-public class TopologyFeed {
+public class StatusFeed {
 
 	private static final Logger LOGGER = Logger.getLogger("io.zeebe.cockpit");
 
@@ -55,9 +54,9 @@ public class TopologyFeed {
 
 	}
 
-	public void broadcast(Topology topology) {
+	public void broadcast(Status status) {
 		try {
-			String data = objectWriter.writeValueAsString(topology);
+			String data = objectWriter.writeValueAsString(status);
 			sessions.forEach(s -> {
 				s.getAsyncRemote().sendObject(data, result -> {
 					if (result.getException() != null) {
@@ -69,6 +68,5 @@ public class TopologyFeed {
 		} catch (JsonProcessingException e) {
 			LOGGER.error(e.getMessage(), e);
 		}
-
 	}
 }

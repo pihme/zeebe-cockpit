@@ -16,45 +16,50 @@ import io.zeebe.client.api.response.Topology;
 @ApplicationScoped
 public class CockpitApp {
 
-	private static final Logger LOGGER = Logger.getLogger("io.zeebe.cockpit");
+    private static final Logger LOGGER = Logger.getLogger("io.zeebe.cockpit");
 
-	@Inject
-	Config config;
-	
-	@Inject
-	TopologyFeed topologyFeed;
+    @Inject
+    Config config;
 
-	ZeebeClient zeebeClient;
+    @Inject
+    StatusFeed topologyFeed;
 
-	void onStart(@Observes StartupEvent ev) {
-		LOGGER.info("The application is starting...");
-		String contactPoint = config.getContactPoint();
+    ZeebeClient zeebeClient;
 
-		LOGGER.info("Configured to talk to " + contactPoint);
+    void onStart(@Observes StartupEvent ev) {
+        LOGGER.info("The application is starting...");
+        String contactPoint = config.getContactPoint();
 
-		zeebeClient = ZeebeClient.newClientBuilder().defaultRequestTimeout(Duration.ofSeconds(3))
-				.brokerContactPoint(contactPoint).usePlaintext().build();
-	}
-	
-	 @Scheduled(every="6s")     
-	 void tick() {
-		 
-	    LOGGER.info("tick"); 
-	    Topology topology = zeebeClient.newTopologyRequest().send().join();	
-	    
-	    topologyFeed.broadcast(topology);
-	    
-	    LOGGER.fine(topology.toString());
-	 }
+        LOGGER.info("Configured to talk to " + contactPoint);
 
+        zeebeClient = ZeebeClient.newClientBuilder().defaultRequestTimeout(Duration.ofSeconds(config.getRequestTimeout()))
+                .brokerContactPoint(contactPoint).usePlaintext().build();
+    }
 
-	void onStop(@Observes ShutdownEvent ev) {
-		zeebeClient.close();
-		LOGGER.info("The application is stopping...");
-	}
+    @Scheduled(every = "{zeebe.cockpit.refreshInterval}")
+    void tick() {
+        if (zeebeClient != null) {
+            LOGGER.fine("tick");
+            topologyFeed.broadcast(getStatus());
+        }
+    }
 
-	public ZeebeClient getZeebeClient() {
-		return zeebeClient;
-	}
+    public Status getStatus() {
+        try {
+            Topology topology = zeebeClient.newTopologyRequest().send().get();
+            return new Status(true, topology);
+        } catch (Exception e) {
+            return new Status(false, null);
+        }
+    }
+
+    void onStop(@Observes ShutdownEvent ev) {
+        zeebeClient.close();
+        LOGGER.info("The application is stopping...");
+    }
+
+    private ZeebeClient getZeebeClient() {
+        return zeebeClient;
+    }
 
 }
