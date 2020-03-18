@@ -1,16 +1,6 @@
 var root = document.body
 
-var Title = {
-    view: function() {
-        return m("h1", { style : "font-size: 2 rem; margin:0px"},
-                        m("a", { href: "/", style: "text-decoration: none; color:white" }, [
-                                m("img", {src: "assets/zeebe-icon.svg", height: 40, width: 40, style: "padding-right: 10px" }),
-                                "zeebe Cockpit"
-                        ])
-                )
-    }
-}
-
+// state
 var Server = {
     config: {}, //will be loaded from server
     loadConfig: function() {
@@ -53,6 +43,18 @@ var Cluster = {
     }
 }
 
+// views
+var Title = {
+    view: function() {
+        return m("h1", { style : "font-size: 2 rem; margin:0px"},
+                        m("a", { href: "/", style: "text-decoration: none; color:white" }, [
+                                m("img", {src: "assets/zeebe-icon.svg", height: 40, width: 40, style: "padding-right: 10px" }),
+                                "zeebe Cockpit"
+                        ])
+                )
+    }
+}
+
 var Url = {
     oninit: Server.loadConfig,
     view: function() {
@@ -87,7 +89,6 @@ var UrlAndConnectionStatus = {
 
 
 var Header = {
-    oninit: Cluster.subscribe,
     view: function() {
         return m("div", { style: "Font-family: IBM Plex Sans,sans-serif; font-weight: 780; background-color:#1c3e73; padding: 10px; color:white;" }, [
                    m(Title),
@@ -96,4 +97,42 @@ var Header = {
     }
 }
 
-m.mount(root, Header)
+var fallbackToQuestionMark = function (supplier) {
+    if (Cluster.status.connected) {
+        return supplier();
+    } else {
+        return "?"
+    }
+}
+
+var NodeStatus = {
+    view: function() {
+        return m("div", [
+            m("h3", "Node Status"),
+            m("div", "Cluster Size: " + fallbackToQuestionMark(() => Cluster.status.nodeStatus.clusterSize)),
+            m("div", "Live Nodes: " + fallbackToQuestionMark(() => Cluster.status.nodeStatus.liveNodes)),
+            m("div", "Dead Nodes: " + fallbackToQuestionMark(() => Cluster.status.nodeStatus.missingNodes)),
+         ])
+    }
+}
+
+var ClusterOverview = {
+    view: function() {
+        return m("div", { style: "Font-family: IBM Plex Sans,sans-serif; padding: 10px;" }, [
+            m("h2", "Cluster Overview"),
+            m(NodeStatus)
+         ])
+    }
+}
+
+var Cockpit = {
+    oninit: Cluster.subscribe,
+    view: function() {
+       return m("div", [
+                m(Header),
+                m(ClusterOverview)
+              ])
+    }
+}
+
+m.mount(root, Cockpit)
