@@ -46,7 +46,7 @@ var Cluster = {
 // views
 var Title = {
     view: function() {
-        return m("h1", { style : "font-size: 2 rem; margin:0px"},
+        return m("h1",
                         m("a", { href: "/", style: "text-decoration: none; color:white" }, [
                                 m("img", {src: "assets/zeebe-icon.svg", height: 40, width: 40, style: "padding-right: 10px" }),
                                 "zeebe Cockpit"
@@ -90,7 +90,7 @@ var UrlAndConnectionStatus = {
 
 var Header = {
     view: function() {
-        return m("div", { style: "Font-family: IBM Plex Sans,sans-serif; font-weight: 780; background-color:#1c3e73; padding: 10px; color:white;" }, [
+        return m("div", { class: "header" }, [
                    m(Title),
                    m(UrlAndConnectionStatus)
                ])
@@ -107,7 +107,7 @@ var fallbackToQuestionMark = function (supplier) {
 
 var NodeStatus = {
     view: function() {
-        return m("div", [
+        return m("div", {class: "column"}, [
             m("h3", "Node Status"),
             m("div", "Cluster Size: " + fallbackToQuestionMark(() => Cluster.status.nodeStatus.clusterSize)),
             m("div", "Live Nodes: " + fallbackToQuestionMark(() => Cluster.status.nodeStatus.liveNodes)),
@@ -116,11 +116,27 @@ var NodeStatus = {
     }
 }
 
+var PartitionStatus = {
+    view: function() {
+        return m("div", {class: "column"}, [
+            m("h3", "Partition Status"),
+            m("div", "Partitions: " + fallbackToQuestionMark(() => Cluster.status.partitionStatus.partitionCount)),
+            m("div", "Overreplicated: " + fallbackToQuestionMark(() => Cluster.status.partitionStatus.partitionCountByReplicationStatus.OVERREPLICATED)),
+            m("div", "Ideal: " + fallbackToQuestionMark(() => Cluster.status.partitionStatus.partitionCountByReplicationStatus.IDEAL)),
+            m("div", "Underreplicated: " + fallbackToQuestionMark(() => Cluster.status.partitionStatus.partitionCountByReplicationStatus.UNDERREPLICATED)),
+            m("div", "Missing: " + fallbackToQuestionMark(() => Cluster.status.partitionStatus.partitionCountByReplicationStatus.MISSING)),
+         ])
+    }
+}
+
 var ClusterOverview = {
     view: function() {
-        return m("div", { style: "Font-family: IBM Plex Sans,sans-serif; padding: 10px;" }, [
+        return m("div", { class: "clusterOverview" }, [
             m("h2", "Cluster Overview"),
-            m(NodeStatus)
+            m("div", {class: "row"}, [
+                m(NodeStatus),
+                m(PartitionStatus),
+            ])
          ])
     }
 }
@@ -128,10 +144,10 @@ var ClusterOverview = {
 var Cockpit = {
     oninit: Cluster.subscribe,
     view: function() {
-       return m("div", [
+       return [
                 m(Header),
                 m(ClusterOverview)
-              ])
+              ]
     }
 }
 
