@@ -1,6 +1,7 @@
 package io.zeebe.cockpit;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +36,9 @@ public class PartitionStats {
 				}
 			});
 		}
+
+		Collections.sort(leaders);
+		Collections.sort(followers);
 
 		replicaCount = leaders.size() + followers.size();
 

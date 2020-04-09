@@ -1,5 +1,6 @@
 package io.zeebe.cockpit;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ public class NodeStatus {
 		List<BrokerInfo> brokerInfos = topology.getBrokers();
 		liveNodes = brokerInfos.size();
 		brokerStats = brokerInfos.stream().map(BrokerStats::new).collect(Collectors.toList());
+		brokerStats.sort(Comparator.comparing(BrokerStats::getNodeId));
 	}
 
 	public int getClusterSize() {

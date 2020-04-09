@@ -1,5 +1,36 @@
 var root = document.body
 
+var myChart = {};
+
+var ChartUpdater = {
+    update: function() {
+        if (myChart) {
+            if (Cluster.status) {
+
+                var labels = [];
+                var totalPartitionCount = [];
+                var leaderPartitionCount = [];
+
+                Cluster.status.nodeStatus.brokerStats.forEach(brokerStat => {
+                    labels.push("Broker" + brokerStat.nodeId);
+                    totalPartitionCount.push(brokerStat.leaderPartitionCount + brokerStat.followerPartitionCount);
+                    leaderPartitionCount.push(brokerStat.leaderPartitionCount);
+                });
+
+                myChart.data.labels = labels;
+                myChart.data.datasets[0].data = totalPartitionCount;
+                myChart.data.datasets[1].data = leaderPartitionCount;
+
+            } else {
+                myChart.data.labels =[];
+                myChart.data.datasets[0].data = [];
+                myChart.data.datasets[1].data = [];
+            }
+            myChart.update();
+        }
+    }
+}
+
 // state
 var Server = {
     config: {}, //will be loaded from server
@@ -16,6 +47,8 @@ var Server = {
     },
 }
 
+
+
 var Cluster = {
     status: {}, //will be loaded from server
     loadStatus: function() {
@@ -27,6 +60,7 @@ var Cluster = {
          .then(function(result) {
             console.log(result)
             Cluster.status = result
+            ChartUpdater.update();
          })
     },
     subscribe: function() {
@@ -39,6 +73,7 @@ var Cluster = {
 
             Cluster.status = status
             m.redraw();
+            ChartUpdater.update();
         };
     }
 }
@@ -129,6 +164,74 @@ var PartitionStatus = {
     }
 }
 
+var NodeDetailRenderer = {
+    nodeDetail: function(brokerStat) {
+        return m("li", "Broker" + brokerStat.nodeId + ": " + brokerStat.leaderPartitionCount + " partitions as leader, " + brokerStat.followerPartitionCount + " partitions as follower" )
+    }
+}
+
+var NodeDetails = {
+    view: function() {
+        return m("div", {class: "column"}, [
+            m("h3", "Node Details"),
+            m("ul", Cluster.status.nodeStatus.brokerStats.map(NodeDetailRenderer.nodeDetail)),
+            m("div", {class: "chartContainer"},
+                m("canvas", {id:"myChart", width:"400", height:"400"})
+            )
+         ])
+    }
+}
+
+var PartitionRendererHelper = {
+    leaderBox: function(id) {
+        return m("div", {class: "leaderBox"},  "L" + id);
+    },
+    followerBox: function(id) {
+         return m("div", {class: "followerBox"}, "F" + id);
+    },
+    replicationStatusIndicator: function(replicationStatus) {
+        var result;
+
+        switch(replicationStatus) {
+          case "IDEAL":
+          case "OVERREPLICATED":
+            result = m("div", {class: "greenDot"}, "G");
+            break;
+          case "UNDERREPLICATED":
+            result = m("div", {class: "yellowDot"}, "Y");
+            break;
+          case "MISSING":
+            result = m("div", {class: "yellowDot"} , "R");
+            break;
+          default:
+            result = m("div", "?");
+        }
+
+        return result;
+    }
+}
+
+var PartitionDetailRenderer = {
+    partitionDetail: function(partitionStat) {
+        return m("div", [
+            m("div",{class: "blockRow"},   "Partition" + partitionStat.partitionId),
+            PartitionRendererHelper.replicationStatusIndicator(partitionStat.replicationStatus),
+            m("div", {class: "blockRow"}, partitionStat.leaders.map(PartitionRendererHelper.leaderBox) ),
+            m("div", {class: "blockRow"}, partitionStat.followers.map(PartitionRendererHelper.followerBox) )
+            ])
+    }
+}
+
+
+var PartitionDetails = {
+    view: function() {
+        return m("div", {class: "column"}, [
+            m("h3", "Partition Details"),
+            m("div", Cluster.status.partitionStatus.partitionStats.map(PartitionDetailRenderer.partitionDetail))
+         ])
+    }
+}
+
 var ClusterOverview = {
     view: function() {
         return m("div", { class: "clusterOverview" }, [
@@ -136,7 +239,11 @@ var ClusterOverview = {
             m("div", {class: "row"}, [
                 m(NodeStatus),
                 m(PartitionStatus),
-            ])
+            ]),
+            m("div", {class: "row"}, [
+                            m(NodeDetails),
+                            m(PartitionDetails),
+                        ])
          ])
     }
 }

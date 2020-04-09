@@ -2,7 +2,7 @@ html, body {
     Font-family: IBM Plex Sans,sans-serif;
     color: #1c3e73;
     background-color: #EEEEEE;
-    height: 100%;
+
 }
 
 h1 {
@@ -51,4 +51,82 @@ h3 {
   border-style: dotted;
   border-width: 1px;
   background-color: white;
+}
+
+.blockRow {
+    display: inline-block;
+}
+
+.leaderBox {
+    background-color: #1c3e73;
+    color: white;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    font-weight: 780;
+    display: inline-block;
+    margin: 5px;
+}
+
+.followerBox {
+    background-color: #0d8dba;
+    color: white;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    font-weight: 780;
+    display: inline-block;
+    margin: 5px;
+}
+
+.redDot {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background-color: red;
+  color: red;
+  display: inline-block;
+  text-align: center;
+  line-height: 30px;
+  margin: 5px;
+  font-weight: 780;
+}
+
+.yellowDot {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background-color: yellow;
+  color: yellow;
+  display: inline-block;
+  text-align: center;
+  line-height: 30px;
+  margin: 5px;
+  font-weight: 780;
+}
+
+.greenDot {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  background-color: green;
+  color: green;
+  display: inline-block;
+  text-align: center;
+  line-height: 30px;
+  margin: 5px;
+  font-weight: 780;
+}
+
+.chartContainer {
+    text-align: center;
+    width: 70%;
+     margin-left: auto;
+        margin-right: auto;
+}
+
+#myChart {
+    display: inline-block;
 }
